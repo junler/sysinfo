@@ -142,9 +142,8 @@ func GetSystemInfo() (*SystemInfo, error) {
 	}
 
 	// Load Average (may not be available on all systems)
-	var loadAvgSlice []float64
 	// LoadAverage is not available on all platforms, so we'll skip it for now
-	loadAvgSlice = []float64{0.0, 0.0, 0.0}
+	loadAvgSlice := []float64{0.0, 0.0, 0.0}
 
 	var cpuInfo CPUInfo
 	if len(cpuInfos) > 0 {
