@@ -48,8 +48,29 @@
                         <dd class="mt-1 text-3xl font-semibold tracking-tight text-gray-900" x-text="data.uptime"></dd>
                     </div>
                     <div class="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
-                        <dt class="truncate text-sm font-medium text-gray-500">Architecture</dt>
-                        <dd class="mt-1 text-3xl font-semibold tracking-tight text-gray-900" x-text="data.architecture"></dd>
+                        <dt class="truncate text-sm font-medium text-gray-500">Process Count</dt>
+                        <dd class="mt-1 text-3xl font-semibold tracking-tight text-gray-900" x-text="data.process_count"></dd>
+                    </div>
+                </div>
+
+                <!-- Load Average -->
+                <div class="overflow-hidden rounded-lg bg-white shadow">
+                    <div class="px-4 py-5 sm:p-6">
+                        <h3 class="text-lg font-semibold leading-6 text-gray-900 mb-4">System Load Average</h3>
+                        <div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
+                            <div class="text-center">
+                                <div class="text-2xl font-bold text-indigo-600" x-text="data.load_average?.load1?.toFixed(2) || '0.00'"></div>
+                                <div class="text-sm text-gray-500">1 minute</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-2xl font-bold text-indigo-600" x-text="data.load_average?.load5?.toFixed(2) || '0.00'"></div>
+                                <div class="text-sm text-gray-500">5 minutes</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-2xl font-bold text-indigo-600" x-text="data.load_average?.load15?.toFixed(2) || '0.00'"></div>
+                                <div class="text-sm text-gray-500">15 minutes</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -76,11 +97,19 @@
                                         <dt class="text-sm font-medium text-gray-500">Frequency</dt>
                                         <dd class="text-sm text-gray-900" x-text="data.cpu?.frequency ? (data.cpu.frequency / 1000).toFixed(2) + ' GHz' : 'N/A'"></dd>
                                     </div>
+                                    <div x-show="data.cpu?.cache_size">
+                                        <dt class="text-sm font-medium text-gray-500">Cache Size</dt>
+                                        <dd class="text-sm text-gray-900" x-text="data.cpu?.cache_size ? data.cpu.cache_size + ' KB' : 'N/A'"></dd>
+                                    </div>
+                                    <div x-show="data.cpu?.temperature && data.cpu.temperature > 0">
+                                        <dt class="text-sm font-medium text-gray-500">Temperature</dt>
+                                        <dd class="text-sm text-gray-900" x-text="data.cpu?.temperature ? data.cpu.temperature.toFixed(1) + '°C' : 'N/A'"></dd>
+                                    </div>
                                 </dl>
                             </div>
                             <div>
                                 <h4 class="text-sm font-medium text-gray-500 mb-2">CPU Usage per Core</h4>
-                                <div class="space-y-2">
+                                <div class="space-y-2 max-h-64 overflow-y-auto">
                                     <template x-for="(usage, index) in data.cpu?.usage || []" :key="index">
                                         <div class="flex items-center">
                                             <span class="w-12 text-xs text-gray-500" x-text="'Core ' + (index + 1)"></span>
@@ -100,8 +129,9 @@
                 <div class="overflow-hidden rounded-lg bg-white shadow">
                     <div class="px-4 py-5 sm:p-6">
                         <h3 class="text-lg font-semibold leading-6 text-gray-900 mb-4">Memory Information</h3>
-                        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                        <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
                             <div>
+                                <h4 class="text-sm font-medium text-gray-500 mb-3">RAM Usage</h4>
                                 <dl class="space-y-3">
                                     <div>
                                         <dt class="text-sm font-medium text-gray-500">Total Memory</dt>
@@ -112,12 +142,37 @@
                                         <dd class="text-sm text-gray-900" x-text="formatBytes(data.memory?.used)"></dd>
                                     </div>
                                     <div>
+                                        <dt class="text-sm font-medium text-gray-500">Available</dt>
+                                        <dd class="text-sm text-gray-900" x-text="formatBytes(data.memory?.available)"></dd>
+                                    </div>
+                                    <div>
                                         <dt class="text-sm font-medium text-gray-500">Free Memory</dt>
                                         <dd class="text-sm text-gray-900" x-text="formatBytes(data.memory?.free)"></dd>
                                     </div>
+                                </dl>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-500 mb-3">Memory Details</h4>
+                                <dl class="space-y-3">
                                     <div>
                                         <dt class="text-sm font-medium text-gray-500">Cached</dt>
                                         <dd class="text-sm text-gray-900" x-text="formatBytes(data.memory?.cached)"></dd>
+                                    </div>
+                                    <div>
+                                        <dt class="text-sm font-medium text-gray-500">Buffers</dt>
+                                        <dd class="text-sm text-gray-900" x-text="formatBytes(data.memory?.buffers)"></dd>
+                                    </div>
+                                    <div>
+                                        <dt class="text-sm font-medium text-gray-500">Shared</dt>
+                                        <dd class="text-sm text-gray-900" x-text="formatBytes(data.memory?.shared)"></dd>
+                                    </div>
+                                    <div>
+                                        <dt class="text-sm font-medium text-gray-500">Active</dt>
+                                        <dd class="text-sm text-gray-900" x-text="formatBytes(data.memory?.active)"></dd>
+                                    </div>
+                                    <div>
+                                        <dt class="text-sm font-medium text-gray-500">Inactive</dt>
+                                        <dd class="text-sm text-gray-900" x-text="formatBytes(data.memory?.inactive)"></dd>
                                     </div>
                                 </dl>
                             </div>
@@ -127,7 +182,7 @@
                                     <div class="flex mb-2 items-center justify-between">
                                         <div>
                                             <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-indigo-600 bg-indigo-200">
-                                                Memory
+                                                RAM
                                             </span>
                                         </div>
                                         <div class="text-right">
@@ -139,6 +194,64 @@
                                         <div :style="'width: ' + (data.memory?.used_percent || 0) + '%'" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-indigo-500 transition-all duration-300"></div>
                                     </div>
                                 </div>
+                                
+                                <!-- Swap Information -->
+                                <div x-show="data.swap?.total > 0">
+                                    <h4 class="text-sm font-medium text-gray-500 mb-2 mt-4">Swap Usage</h4>
+                                    <dl class="space-y-2 mb-2">
+                                        <div class="flex justify-between">
+                                            <dt class="text-xs text-gray-500">Total:</dt>
+                                            <dd class="text-xs text-gray-900" x-text="formatBytes(data.swap?.total)"></dd>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <dt class="text-xs text-gray-500">Used:</dt>
+                                            <dd class="text-xs text-gray-900" x-text="formatBytes(data.swap?.used)"></dd>
+                                        </div>
+                                    </dl>
+                                    <div class="relative pt-1">
+                                        <div class="flex mb-2 items-center justify-between">
+                                            <div>
+                                                <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-orange-600 bg-orange-200">
+                                                    Swap
+                                                </span>
+                                            </div>
+                                            <div class="text-right">
+                                                <span class="text-xs font-semibold inline-block text-orange-600" x-text="data.swap?.used_percent?.toFixed(1) + '%'">
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="overflow-hidden h-4 mb-4 text-xs flex rounded bg-orange-200">
+                                            <div :style="'width: ' + (data.swap?.used_percent || 0) + '%'" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-orange-500 transition-all duration-300"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Disk I/O Statistics -->
+                <div class="overflow-hidden rounded-lg bg-white shadow">
+                    <div class="px-4 py-5 sm:p-6">
+                        <h3 class="text-lg font-semibold leading-6 text-gray-900 mb-4">Disk I/O Statistics</h3>
+                        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                            <div class="text-center">
+                                <div class="text-2xl font-bold text-green-600" x-text="formatBytes(data.io_stats?.disk_read_bytes || 0)"></div>
+                                <div class="text-sm text-gray-500">Total Read</div>
+                                <div class="text-xs text-gray-400" x-text="(data.io_stats?.disk_read_count || 0) + ' operations'"></div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-2xl font-bold text-blue-600" x-text="formatBytes(data.io_stats?.disk_write_bytes || 0)"></div>
+                                <div class="text-sm text-gray-500">Total Write</div>
+                                <div class="text-xs text-gray-400" x-text="(data.io_stats?.disk_write_count || 0) + ' operations'"></div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-2xl font-bold text-purple-600" x-text="data.io_stats?.disk_read_count && data.io_stats.disk_read_time ? (data.io_stats.disk_read_time / data.io_stats.disk_read_count).toFixed(2) + ' ms' : '0 ms'"></div>
+                                <div class="text-sm text-gray-500">Avg Read Time</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-2xl font-bold text-red-600" x-text="data.io_stats?.disk_write_count && data.io_stats.disk_write_time ? (data.io_stats.disk_write_time / data.io_stats.disk_write_count).toFixed(2) + ' ms' : '0 ms'"></div>
+                                <div class="text-sm text-gray-500">Avg Write Time</div>
                             </div>
                         </div>
                     </div>
@@ -159,12 +272,13 @@
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Used</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Free</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usage</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Inodes</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
                                     <template x-for="disk in data.disk || []" :key="disk.device">
                                         <tr>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" x-text="disk.device"></td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" x-text="disk.device.length > 20 ? disk.device.substring(0, 20) + '...' : disk.device"></td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" x-text="disk.mountpoint"></td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="disk.fstype"></td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" x-text="formatBytes(disk.total)"></td>
@@ -177,6 +291,13 @@
                                                     </div>
                                                     <span class="text-sm text-gray-900" x-text="disk.used_percent.toFixed(1) + '%'"></span>
                                                 </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                <div x-show="disk.inodes_total > 0">
+                                                    <div class="text-xs" x-text="disk.inodes_used + '/' + disk.inodes_total"></div>
+                                                    <div class="text-xs text-gray-400" x-text="((disk.inodes_used / disk.inodes_total) * 100).toFixed(1) + '%'"></div>
+                                                </div>
+                                                <div x-show="disk.inodes_total === 0" class="text-xs text-gray-400">N/A</div>
                                             </td>
                                         </tr>
                                     </template>
@@ -202,23 +323,176 @@
                                         <dt class="text-sm text-gray-500">Bytes Received:</dt>
                                         <dd class="text-sm text-gray-900" x-text="formatBytes(data.network?.bytes_recv)"></dd>
                                     </div>
+                                    <div class="flex justify-between">
+                                        <dt class="text-sm text-gray-500">Packets Sent:</dt>
+                                        <dd class="text-sm text-gray-900" x-text="(data.network?.packets_sent || 0).toLocaleString()"></dd>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <dt class="text-sm text-gray-500">Packets Received:</dt>
+                                        <dd class="text-sm text-gray-900" x-text="(data.network?.packets_recv || 0).toLocaleString()"></dd>
+                                    </div>
+                                </dl>
+                                
+                                <h4 class="text-sm font-medium text-gray-500 mb-2 mt-4">Network Errors & Drops</h4>
+                                <dl class="space-y-2">
+                                    <div class="flex justify-between">
+                                        <dt class="text-sm text-gray-500">Errors In:</dt>
+                                        <dd class="text-sm" :class="data.network?.errors_in > 0 ? 'text-red-600' : 'text-gray-900'" x-text="data.network?.errors_in || 0"></dd>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <dt class="text-sm text-gray-500">Errors Out:</dt>
+                                        <dd class="text-sm" :class="data.network?.errors_out > 0 ? 'text-red-600' : 'text-gray-900'" x-text="data.network?.errors_out || 0"></dd>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <dt class="text-sm text-gray-500">Drops In:</dt>
+                                        <dd class="text-sm" :class="data.network?.drops_in > 0 ? 'text-orange-600' : 'text-gray-900'" x-text="data.network?.drops_in || 0"></dd>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <dt class="text-sm text-gray-500">Drops Out:</dt>
+                                        <dd class="text-sm" :class="data.network?.drops_out > 0 ? 'text-orange-600' : 'text-gray-900'" x-text="data.network?.drops_out || 0"></dd>
+                                    </div>
                                 </dl>
                             </div>
                             <div>
                                 <h4 class="text-sm font-medium text-gray-500 mb-2">Network Interfaces</h4>
-                                <div class="space-y-2 max-h-40 overflow-y-auto">
+                                <div class="space-y-2 max-h-80 overflow-y-auto">
                                     <template x-for="iface in data.network?.interfaces || []" :key="iface.name">
-                                        <div class="border border-gray-200 rounded p-2">
-                                            <div class="font-medium text-sm" x-text="iface.name"></div>
-                                            <div class="text-xs text-gray-500">
-                                                <template x-for="addr in iface.addresses" :key="addr">
+                                        <div class="border border-gray-200 rounded p-3">
+                                            <div class="flex justify-between items-center mb-1">
+                                                <div class="font-medium text-sm" x-text="iface.name"></div>
+                                                <div class="text-xs text-gray-500" x-text="'MTU: ' + iface.mtu"></div>
+                                            </div>
+                                            <div class="text-xs text-gray-600 space-y-1">
+                                                <template x-for="addr in iface.addresses.slice(0, 3)" :key="addr">
                                                     <div x-text="addr"></div>
                                                 </template>
+                                                <div x-show="iface.addresses.length > 3" class="text-gray-400" x-text="'... and ' + (iface.addresses.length - 3) + ' more'"></div>
+                                                <div x-show="iface.hardware_addr" class="text-gray-500">
+                                                    <span class="font-medium">MAC:</span> <span x-text="iface.hardware_addr"></span>
+                                                </div>
+                                                <div x-show="iface.flags && iface.flags.length > 0" class="text-gray-500">
+                                                    <span class="font-medium">Flags:</span> <span x-text="iface.flags.join(', ')"></span>
+                                                </div>
                                             </div>
                                         </div>
                                     </template>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Processes -->
+                <div class="overflow-hidden rounded-lg bg-white shadow">
+                    <div class="px-4 py-5 sm:p-6">
+                        <h3 class="text-lg font-semibold leading-6 text-gray-900 mb-4">Top Processes by CPU Usage</h3>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PID</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CPU%</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Memory%</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">RSS</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    <template x-for="(process, index) in data.top_processes?.slice(0, 15) || []" :key="process.pid">
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" x-text="process.pid"></td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" x-text="process.name.length > 20 ? process.name.substring(0, 20) + '...' : process.name"></td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" 
+                                                      :class="process.status === 'running' ? 'bg-green-100 text-green-800' : process.status === 'sleep' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'"
+                                                      x-text="process.status">
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                <div class="flex items-center">
+                                                    <div class="w-12 bg-gray-200 rounded-full h-2 mr-2">
+                                                        <div class="bg-red-500 h-2 rounded-full" :style="'width: ' + Math.min(process.cpu_percent, 100) + '%'"></div>
+                                                    </div>
+                                                    <span x-text="process.cpu_percent.toFixed(1) + '%'"></span>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                <div class="flex items-center">
+                                                    <div class="w-12 bg-gray-200 rounded-full h-2 mr-2">
+                                                        <div class="bg-purple-500 h-2 rounded-full" :style="'width: ' + Math.min(process.mem_percent, 100) + '%'"></div>
+                                                    </div>
+                                                    <span x-text="process.mem_percent.toFixed(1) + '%'"></span>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="formatBytes(process.memory_rss)"></td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="process.username"></td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Users -->
+                <div class="overflow-hidden rounded-lg bg-white shadow" x-show="data.users && data.users.length > 0">
+                    <div class="px-4 py-5 sm:p-6">
+                        <h3 class="text-lg font-semibold leading-6 text-gray-900 mb-4">Active Users</h3>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Terminal</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Host</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Login Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    <template x-for="user in data.users || []" :key="user.user + user.terminal + user.started">
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" x-text="user.user"></td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" x-text="user.terminal"></td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="user.host"></td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="new Date(user.started * 1000).toLocaleString()"></td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Services -->
+                <div class="overflow-hidden rounded-lg bg-white shadow" x-show="data.system_services && data.system_services.length > 0">
+                    <div class="px-4 py-5 sm:p-6">
+                        <h3 class="text-lg font-semibold leading-6 text-gray-900 mb-4">System Services (Sample)</h3>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PID</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    <template x-for="service in data.system_services?.slice(0, 15) || []" :key="service.name + service.pid">
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" x-text="service.name"></td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" 
+                                                      :class="service.status === 'running' ? 'bg-green-100 text-green-800' : service.status === 'sleep' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'"
+                                                      x-text="service.status">
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="service.pid"></td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -274,37 +548,75 @@
                 async fetchData() {
                     this.loading = true;
                     try {
-                        const [infoResponse, portsResponse] = await Promise.all([
+                        // Fetch multiple endpoints in parallel for better performance
+                        const [infoResponse, portsResponse, monitoringResponse] = await Promise.all([
                             fetch('/api/info'),
-                            fetch('/api/ports')
+                            fetch('/api/ports'),
+                            fetch('/api/monitoring').catch(() => null) // Fallback in case monitoring endpoint is not available
                         ]);
                         
                         this.data = await infoResponse.json();
                         this.ports = await portsResponse.json();
+                        
+                        // If monitoring endpoint is available, merge the data
+                        if (monitoringResponse && monitoringResponse.ok) {
+                            const monitoringData = await monitoringResponse.json();
+                            // Merge monitoring data with existing data
+                            this.data = { ...this.data, ...monitoringData };
+                        }
+                        
+                        console.log('System data loaded:', this.data);
                     } catch (error) {
                         console.error('Error fetching data:', error);
+                        // Show error notification
+                        this.showNotification('Error loading system data', 'error');
                     } finally {
                         this.loading = false;
                     }
                 },
                 
                 formatBytes(bytes) {
-                    if (!bytes) return '0 B';
+                    if (!bytes || bytes === 0) return '0 B';
                     const k = 1024;
                     const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
                     const i = Math.floor(Math.log(bytes) / Math.log(k));
                     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+                },
+                
+                showNotification(message, type = 'info') {
+                    // Simple notification - you could enhance this with a toast library
+                    const notification = document.createElement('div');
+                    notification.className = `fixed top-4 right-4 p-4 rounded-md shadow-lg z-50 ${
+                        type === 'error' ? 'bg-red-100 text-red-800 border border-red-200' : 
+                        'bg-blue-100 text-blue-800 border border-blue-200'
+                    }`;
+                    notification.textContent = message;
+                    document.body.appendChild(notification);
+                    
+                    setTimeout(() => {
+                        notification.remove();
+                    }, 5000);
                 }
             }
         }
 
         // Auto-refresh every 30 seconds
         setInterval(() => {
-            if (window.Alpine && window.Alpine.store) {
-                // Trigger refresh if Alpine.js is available
-                document.querySelector('[x-data]').__x.$data.fetchData();
+            const appElement = document.querySelector('[x-data]');
+            if (appElement && appElement.__x && appElement.__x.$data) {
+                appElement.__x.$data.fetchData();
             }
         }, 30000);
+        
+        // Refresh on visibility change (when tab becomes active)
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                const appElement = document.querySelector('[x-data]');
+                if (appElement && appElement.__x && appElement.__x.$data) {
+                    appElement.__x.$data.fetchData();
+                }
+            }
+        });
     </script>
 </body>
 </html>

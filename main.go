@@ -14,6 +14,7 @@ func main() {
 		fmt.Println()
 		fmt.Println("Usage:")
 		fmt.Println("  sysinfo info     - Show system information")
+		fmt.Println("  sysinfo monitor  - Show detailed monitoring metrics")
 		fmt.Println("  sysinfo ports    - Show open ports")
 		fmt.Println("  sysinfo serve    - Start web server")
 		fmt.Println("  sysinfo version  - Show version information")

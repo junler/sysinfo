@@ -49,6 +49,12 @@ func (ws *WebServer) setupRoutes() {
 		api.GET("/info", ws.getSystemInfo)
 		api.GET("/ports", ws.getPorts)
 		api.GET("/health", ws.healthCheck)
+		api.GET("/processes", ws.getTopProcesses)
+		api.GET("/monitoring", ws.getMonitoringData)
+		api.GET("/temperature", ws.getTemperature)
+		api.GET("/iostats", ws.getIOStats)
+		api.GET("/users", ws.getUsers)
+		api.GET("/services", ws.getServices)
 	}
 }
 
@@ -72,6 +78,88 @@ func (ws *WebServer) getPorts(c *gin.Context) {
 
 func (ws *WebServer) healthCheck(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "ok"})
+}
+
+func (ws *WebServer) getTopProcesses(c *gin.Context) {
+	info, err := sysinfo.GetSystemInfo()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"processes": info.TopProcesses})
+}
+
+func (ws *WebServer) getMonitoringData(c *gin.Context) {
+	info, err := sysinfo.GetSystemInfo()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Return a subset of monitoring data for dashboard
+	monitoringData := gin.H{
+		"load_average": info.LoadAverage,
+		"memory":       info.Memory,
+		"swap":         info.Swap,
+		"cpu":          info.CPU,
+		"io_stats":     info.IOStats,
+		"network": gin.H{
+			"bytes_sent":   info.Network.BytesSent,
+			"bytes_recv":   info.Network.BytesRecv,
+			"packets_sent": info.Network.PacketsSent,
+			"packets_recv": info.Network.PacketsRecv,
+			"errors_in":    info.Network.ErrorsIn,
+			"errors_out":   info.Network.ErrorsOut,
+		},
+		"top_processes": info.TopProcesses[:min(10, len(info.TopProcesses))],
+		"disk":          info.Disk,
+	}
+
+	c.JSON(http.StatusOK, monitoringData)
+}
+
+func (ws *WebServer) getTemperature(c *gin.Context) {
+	info, err := sysinfo.GetSystemInfo()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, info.Temperature)
+}
+
+func (ws *WebServer) getIOStats(c *gin.Context) {
+	info, err := sysinfo.GetSystemInfo()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, info.IOStats)
+}
+
+func (ws *WebServer) getUsers(c *gin.Context) {
+	info, err := sysinfo.GetSystemInfo()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"users": info.Users})
+}
+
+func (ws *WebServer) getServices(c *gin.Context) {
+	info, err := sysinfo.GetSystemInfo()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"services": info.SystemServices})
+}
+
+// min returns the smaller of two integers
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }
 
 func (ws *WebServer) Start() error {
