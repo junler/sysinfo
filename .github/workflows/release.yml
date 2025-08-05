@@ -11,6 +11,8 @@ env:
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -60,21 +62,37 @@ jobs:
             
             echo "Building for $GOOS/$GOARCH..."
             env GOOS=$GOOS GOARCH=$GOARCH go build -ldflags="$LDFLAGS" -o "dist/${BINARY_NAME}-${GOOS}-${GOARCH}" .
-            
-            # Create archive
-            cd dist
-            if [ "$GOOS" = "windows" ]; then
-              zip "sysinfo-${GOOS}-${GOARCH}.zip" "${BINARY_NAME}-${GOOS}-${GOARCH}" ../README.md
-            else
-              tar -czf "sysinfo-${GOOS}-${GOARCH}.tar.gz" "${BINARY_NAME}-${GOOS}-${GOARCH}" ../README.md
-            fi
-            cd ..
           done
+
+      - name: Create archives
+        run: |
+          cd dist
+          
+          # Create tar.gz archives for Unix-like systems
+          for file in sysinfo-linux-* sysinfo-darwin-*; do
+            if [ -f "$file" ]; then
+              BASENAME=$(basename "$file" | sed 's/sysinfo-//')
+              tar -czf "sysinfo-${BASENAME}.tar.gz" "$file" ../README.md
+            fi
+          done
+          
+          # Create zip archives for Windows
+          for file in sysinfo-windows-*; do
+            if [ -f "$file" ]; then
+              BASENAME=$(basename "$file" .exe | sed 's/sysinfo-//')
+              zip "sysinfo-${BASENAME}.zip" "$file" ../README.md
+            fi
+          done
+          
+          # List created files for debugging
+          ls -la *.tar.gz *.zip || echo "No archives found"
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/*.tar.gz dist/*.zip
+          files: |
+            dist/*.tar.gz
+            dist/*.zip
           draft: false
           prerelease: false
           generate_release_notes: true
