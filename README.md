@@ -1,5 +1,10 @@
 # System Information Tool
 
+[![Build](https://github.com/junler/sysinfo/actions/workflows/build.yml/badge.svg)](https://github.com/junler/sysinfo/actions/workflows/build.yml)
+[![CI](https://github.com/junler/sysinfo/actions/workflows/ci.yml/badge.svg)](https://github.com/junler/sysinfo/actions/workflows/ci.yml)
+[![Release](https://github.com/junler/sysinfo/actions/workflows/release.yml/badge.svg)](https://github.com/junler/sysinfo/actions/workflows/release.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/junler/sysinfo)](https://goreportcard.com/report/github.com/junler/sysinfo)
+
 一个功能强大的系统信息展示工具，支持命令行和Web界面两种展示方式。
 
 ## 功能特性
@@ -13,12 +18,27 @@
 
 ## 安装
 
+### 从 GitHub Releases 下载
+
+前往 [Releases 页面](https://github.com/junler/sysinfo/releases) 下载适合你系统的预编译二进制文件：
+
+- Linux (x64): `sysinfo-linux-amd64.tar.gz`
+- Linux (ARM64): `sysinfo-linux-arm64.tar.gz`
+- macOS (x64): `sysinfo-darwin-amd64.tar.gz`
+- macOS (ARM64): `sysinfo-darwin-arm64.tar.gz`
+- Windows (x64): `sysinfo-windows-amd64.zip`
+
+### 从源码构建
+
 ```bash
 # 克隆仓库
 git clone https://github.com/junler/sysinfo.git
 cd sysinfo
 
 # 构建应用
+make build
+
+# 或者直接使用 go build
 go build -o sysinfo .
 ```
 
@@ -173,6 +193,37 @@ CPU Usage per core: 58.0%, 2.0%, 41.0%, 0.0%, 36.0%, 0.0%...
 - [ ] 添加警报和通知功能
 - [ ] 支持多节点监控
 - [ ] Docker容器化部署
+
+## 开发
+
+### 本地开发
+
+```bash
+# 安装依赖
+make install
+
+# 运行测试
+make test
+
+# 构建
+make build
+
+# 启动 Web 服务器
+make run-web
+```
+
+### 发布新版本
+
+1. 更新 `Makefile` 中的 `VERSION`
+2. 提交代码并推送到 main 分支
+3. 创建并推送标签：
+
+   ```bash
+   make tag
+   git push origin v1.0.0
+   ```
+
+4. GitHub Actions 将自动构建并创建 Release
 
 ## 许可证
 

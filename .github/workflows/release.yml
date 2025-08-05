@@ -1,0 +1,105 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+env:
+  GO_VERSION: "1.24.1"
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+      version: ${{ steps.get_version.outputs.version }}
+    steps:
+      - name: Get version
+        id: get_version
+        run: echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ steps.get_version.outputs.version }}
+          draft: false
+          prerelease: false
+
+  build-and-upload:
+    needs: create-release
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+            asset_name: sysinfo-linux-amd64.tar.gz
+          - goos: linux
+            goarch: arm64
+            asset_name: sysinfo-linux-arm64.tar.gz
+          - goos: darwin
+            goarch: amd64
+            asset_name: sysinfo-darwin-amd64.tar.gz
+          - goos: darwin
+            goarch: arm64
+            asset_name: sysinfo-darwin-arm64.tar.gz
+          - goos: windows
+            goarch: amd64
+            asset_name: sysinfo-windows-amd64.zip
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Get build info
+        id: build_info
+        run: |
+          BUILD_TIME=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
+          GIT_COMMIT=$(git rev-parse --short HEAD)
+          echo "build_time=$BUILD_TIME" >> $GITHUB_OUTPUT
+          echo "git_commit=$GIT_COMMIT" >> $GITHUB_OUTPUT
+
+      - name: Build
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+        run: |
+          BINARY_NAME=sysinfo
+          if [ "$GOOS" = "windows" ]; then
+            BINARY_NAME="${BINARY_NAME}.exe"
+          fi
+
+          LDFLAGS="-s -w"
+          LDFLAGS="$LDFLAGS -X 'github.com/junler/sysinfo/cmd.Version=${{ needs.create-release.outputs.version }}'"
+          LDFLAGS="$LDFLAGS -X 'github.com/junler/sysinfo/cmd.BuildTime=${{ steps.build_info.outputs.build_time }}'"
+          LDFLAGS="$LDFLAGS -X 'github.com/junler/sysinfo/cmd.GitCommit=${{ steps.build_info.outputs.git_commit }}'"
+
+          go build -ldflags="$LDFLAGS" -o "$BINARY_NAME" .
+
+          # Create archive
+          if [ "$GOOS" = "windows" ]; then
+            zip "${{ matrix.asset_name }}" "$BINARY_NAME" README.md
+          else
+            tar -czf "${{ matrix.asset_name }}" "$BINARY_NAME" README.md
+          fi
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: ./${{ matrix.asset_name }}
+          asset_name: ${{ matrix.asset_name }}
+          asset_content_type: application/octet-stream

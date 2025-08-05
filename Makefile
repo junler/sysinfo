@@ -1,4 +1,4 @@
-.PHONY: build clean run-cli run-web test install help
+.PHONY: build clean run-cli run-web test install help release tag
 
 # 版本信息
 VERSION := 1.0.0
@@ -11,13 +11,15 @@ LDFLAGS := -ldflags="-s -w -X 'github.com/junler/sysinfo/cmd.Version=$(VERSION)'
 # 默认目标
 help:
 	@echo "Available targets:"
-	@echo "  build    - Build the sysinfo binary"
-	@echo "  clean    - Remove build artifacts"
-	@echo "  run-cli  - Run CLI version"
-	@echo "  run-web  - Run web server on port 8080"
-	@echo "  test     - Run tests"
-	@echo "  install  - Install dependencies"
-	@echo "  help     - Show this help message"
+	@echo "  build      - Build the sysinfo binary"
+	@echo "  clean      - Remove build artifacts"
+	@echo "  run-cli    - Run CLI version"
+	@echo "  run-web    - Run web server on port 8080"
+	@echo "  test       - Run tests"
+	@echo "  install    - Install dependencies"
+	@echo "  release    - Create a new release tag"
+	@echo "  build-all  - Build for all platforms"
+	@echo "  help       - Show this help message"
 
 # 构建二进制文件
 build:
@@ -51,6 +53,20 @@ install:
 	@echo "Installing dependencies..."
 	go mod tidy
 	go mod download
+
+# 创建发布标签
+tag:
+	@echo "Current version: $(VERSION)"
+	@echo "Creating tag v$(VERSION)..."
+	git tag -a v$(VERSION) -m "Release v$(VERSION)"
+	@echo "Tag created. Push with: git push origin v$(VERSION)"
+
+# 发布流程
+release: test build
+	@echo "Creating release for version $(VERSION)"
+	@echo "1. Run 'make tag' to create the tag"
+	@echo "2. Run 'git push origin v$(VERSION)' to trigger GitHub Actions"
+	@echo "3. GitHub Actions will build and create the release automatically"
 
 # 构建多平台版本
 build-all: clean builds
