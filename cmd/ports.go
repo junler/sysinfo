@@ -17,9 +17,22 @@ var portsCmd = &cobra.Command{
 			return
 		}
 
-		fmt.Printf("%-10s %-10s %-10s\n", "PORT", "PROTOCOL", "STATUS")
+		fmt.Println("=== Open Ports ===")
+		fmt.Printf("%-8s %-10s %-10s %-20s %-8s %-15s\n", "PORT", "PROTOCOL", "STATUS", "PROCESS", "PID", "ADDRESS")
+		fmt.Println("------------------------------------------------------------------------")
 		for _, p := range ports {
-			fmt.Printf("%-10s %-10s %-10s\n", p.Port, p.Protocol, p.Process)
+			pidStr := "N/A"
+			if p.PID != 0 {
+				pidStr = fmt.Sprintf("%d", p.PID)
+			}
+			fmt.Printf("%-8s %-10s %-10s %-20s %-8s %-15s\n",
+				p.Port, p.Protocol, p.Status, p.Process, pidStr, p.Address)
+		}
+
+		if len(ports) == 0 {
+			fmt.Println("No open ports found.")
+		} else {
+			fmt.Printf("\nTotal: %d open ports\n", len(ports))
 		}
 	},
 }
